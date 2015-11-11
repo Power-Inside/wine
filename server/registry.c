@@ -814,6 +814,7 @@ static struct key *create_key( struct key *key, const struct unicode_str *name,
         free(key->class);
         if (!(key->class = memdup( class->str, key->classlen ))) key->classlen = 0;
     }
+    touch_key( key->parent, REG_NOTIFY_CHANGE_NAME );
     grab_object( key );
     return key;
 }
@@ -2288,6 +2289,11 @@ DECL_HANDLER(set_registry_notification)
                     notify->process = current->process;
                     list_add_head( &key->notify_list, &notify->entry );
                 }
+            }
+            if (notify)
+            {
+                reset_event( event );
+                set_error( STATUS_PENDING );
             }
             release_object( event );
         }

@@ -60,14 +60,25 @@ typedef struct tagME_String
   int nLen, nBuffer;
 } ME_String;
 
+typedef struct tagME_FontCacheItem
+{
+  LOGFONTW lfSpecs;
+  HFONT hFont;
+  int nRefs;
+  int nAge;
+} ME_FontCacheItem;
+
+#define HFONT_CACHE_SIZE 10
+
 typedef struct tagME_Style
 {
   CHARFORMAT2W fmt;
 
-  HFONT hFont; /* cached font for the style */
+  ME_FontCacheItem *font_cache; /* cached font for the style */
   TEXTMETRICW tm; /* cached font metrics for the style */
   int nRefs; /* reference count */
   SCRIPT_CACHE script_cache;
+  struct list entry;
 } ME_Style;
 
 typedef enum {
@@ -372,16 +383,6 @@ typedef struct tagME_OutStream {
   UINT nNestingLevel;
 } ME_OutStream;
 
-typedef struct tagME_FontCacheItem
-{
-  LOGFONTW lfSpecs;
-  HFONT hFont;
-  int nRefs;
-  int nAge;
-} ME_FontCacheItem;
-
-#define HFONT_CACHE_SIZE 10
-
 typedef struct tagME_TextEditor
 {
   HWND hWnd, hwndParent;
@@ -444,6 +445,7 @@ typedef struct tagME_TextEditor
 
   BOOL bMouseCaptured;
   int wheel_remain;
+  struct list style_list;
 } ME_TextEditor;
 
 typedef struct tagME_Context

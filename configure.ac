@@ -674,10 +674,10 @@ AC_CHECK_HEADERS([libprocstat.h],,,
 dnl **** Check for working dll ****
 
 AC_SUBST(dlldir,"\${libdir}/wine")
-AC_SUBST(DLLPREFIX,"")
 AC_SUBST(DLLFLAGS,"-D_REENTRANT")
 AC_SUBST(LDRPATH_INSTALL,"")
 AC_SUBST(LDRPATH_LOCAL,"")
+AC_SUBST(LOADER_RULES,"")
 LIBEXT="so"
 DLLEXT=".so"
 IMPLIBEXT="def"
@@ -689,10 +689,6 @@ wine_binary="wine"
 test "x$enable_win64" != "xyes" || wine_binary="wine64"
 loader_programs="$wine_binary"
 libwine_soversion=`expr $libwine_version : '\([[0-9]]*\)\..*'`
-
-AC_SUBST(LOADER_RULES,["
-all: wine.inf
-"])
 
 case $host_os in
   cygwin*|mingw32*)
@@ -718,7 +714,7 @@ case $host_os in
     case $host_os in
         mingw32*)
           crtlibs="-lmsvcrt"
-          AC_SUBST(SOCKET_LIBS,"-L\$(top_builddir)/dlls/ws2_32 -lws2_32") ;;
+          AC_SUBST(SOCKET_LIBS,"-lws2_32") ;;
     esac
 
     libwine_targets="libwine.dll libwine.a"
@@ -894,7 +890,6 @@ $wine_binary $wine_binary-installed: wine_info.plist
 
   linux-android*)
     DLLFLAGS="$DLLFLAGS -fPIC"
-    DLLPREFIX="lib"
     LDEXECFLAGS=""
     dlldir="\${libdir}"
     WINE_TRY_CFLAGS([-fPIC -Wl,--export-dynamic],
@@ -2827,6 +2822,7 @@ WINE_CONFIG_DLL(bcrypt)
 WINE_CONFIG_TEST(dlls/bcrypt/tests)
 WINE_CONFIG_DLL(browseui,,[clean,po])
 WINE_CONFIG_TEST(dlls/browseui/tests)
+WINE_CONFIG_DLL(bthprops.cpl)
 WINE_CONFIG_DLL(cabinet,,[implib])
 WINE_CONFIG_TEST(dlls/cabinet/tests)
 WINE_CONFIG_DLL(capi2032,,[implib])
@@ -3495,13 +3491,12 @@ WINE_CONFIG_TEST(dlls/xmllite/tests)
 WINE_CONFIG_DLL(xolehlp)
 WINE_CONFIG_DLL(xpsprint)
 WINE_CONFIG_DLL(xpssvcs)
-WINE_CONFIG_MAKEFILE([documentation],,[clean])
 WINE_CONFIG_MAKEFILE([fonts],,[clean,install-lib])
 WINE_CONFIG_MAKEFILE([include],,[clean,install-dev])
 WINE_CONFIG_MAKEFILE([libs/port])
 WINE_CONFIG_MAKEFILE([libs/wine],,[clean,config,install-dev,install-lib])
 WINE_CONFIG_MAKEFILE([libs/wpp])
-WINE_CONFIG_MAKEFILE([loader],,[clean,config,install-lib,manpage])
+WINE_CONFIG_MAKEFILE([loader],,[clean,config,install-lib])
 WINE_CONFIG_PROGRAM(arp,,[install])
 WINE_CONFIG_PROGRAM(aspnet_regiis,,[install])
 WINE_CONFIG_PROGRAM(attrib,,[install,po])
@@ -3586,6 +3581,7 @@ WINE_CONFIG_PROGRAM(winhlp32,,[install,po])
 WINE_CONFIG_PROGRAM(winoldap.mod16,enable_win16,[install])
 WINE_CONFIG_PROGRAM(winver,,[install])
 WINE_CONFIG_PROGRAM(wmic,,[install,po])
+WINE_CONFIG_PROGRAM(wmplayer,,[install])
 WINE_CONFIG_PROGRAM(wordpad,,[install,po])
 WINE_CONFIG_PROGRAM(write,,[install,po])
 WINE_CONFIG_PROGRAM(wscript,,[clean,install])
@@ -3593,16 +3589,16 @@ WINE_CONFIG_TEST(programs/wscript/tests)
 WINE_CONFIG_PROGRAM(wusa,,[install])
 WINE_CONFIG_PROGRAM(xcopy,,[install,po])
 WINE_CONFIG_TEST(programs/xcopy/tests)
-WINE_CONFIG_MAKEFILE([server],,[clean,install-lib,manpage])
+WINE_CONFIG_MAKEFILE([server],,[clean,install-lib])
 WINE_CONFIG_TOOL(tools,[clean])
 WINE_CONFIG_TOOL(tools/sfnt2fon,[clean])
-WINE_CONFIG_TOOL(tools/widl,[clean,install-dev,manpage])
-WINE_CONFIG_TOOL(tools/winebuild,[clean,install-dev,manpage])
-WINE_CONFIG_TOOL(tools/winedump,[clean,install-dev,manpage])
-WINE_CONFIG_TOOL(tools/winegcc,[clean,install-dev,manpage])
-WINE_CONFIG_TOOL(tools/winemaker,[install-dev,manpage])
-WINE_CONFIG_TOOL(tools/wmc,[clean,install-dev,manpage])
-WINE_CONFIG_TOOL(tools/wrc,[clean,install-dev,manpage])
+WINE_CONFIG_TOOL(tools/widl,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/winebuild,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/winedump,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/winegcc,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/winemaker,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/wmc,[clean,install-dev])
+WINE_CONFIG_TOOL(tools/wrc,[clean,install-dev])
 
 AC_SUBST([LINGUAS],["\
 ar \

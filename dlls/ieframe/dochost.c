@@ -93,20 +93,22 @@ void on_commandstate_change(DocHost *doc_host, LONG command, VARIANT_BOOL enable
     dispparams.rgvarg = params;
 
     V_VT(params) = VT_BOOL;
-    V_BOOL(params) = enable;
+    V_BOOL(params) = enable ? VARIANT_TRUE : VARIANT_FALSE;
 
     V_VT(params+1) = VT_I4;
     V_I4(params+1) = command;
 
     call_sink(doc_host->cps.wbe2, DISPID_COMMANDSTATECHANGE, &dispparams);
+
+    doc_host->container_vtbl->on_command_state_change(doc_host, command, enable);
 }
 
 void update_navigation_commands(DocHost *dochost)
 {
     unsigned pos = dochost->travellog.loading_pos == -1 ? dochost->travellog.position : dochost->travellog.loading_pos;
 
-    on_commandstate_change(dochost, CSC_NAVIGATEBACK, pos > 0 ? VARIANT_TRUE : VARIANT_FALSE);
-    on_commandstate_change(dochost, CSC_NAVIGATEFORWARD, pos < dochost->travellog.length ? VARIANT_TRUE : VARIANT_FALSE);
+    on_commandstate_change(dochost, CSC_NAVIGATEBACK, pos > 0);
+    on_commandstate_change(dochost, CSC_NAVIGATEFORWARD, pos < dochost->travellog.length);
 }
 
 static void notif_complete(DocHost *This, DISPID dispid)
@@ -498,7 +500,7 @@ void create_doc_view_hwnd(DocHost *This)
         doc_view_atom = RegisterClassExW(&wndclass);
     }
 
-    This->container_vtbl->GetDocObjRect(This, &rect);
+    This->container_vtbl->get_docobj_rect(This, &rect);
     This->hwnd = CreateWindowExW(0, wszShell_DocObject_View,
          wszShell_DocObject_View,
          WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_TABSTOP,

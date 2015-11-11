@@ -9,7 +9,7 @@
 @ stub WsAddErrorString
 @ stub WsAddMappedHeader
 @ stub WsAddressMessage
-@ stub WsAlloc
+@ stdcall WsAlloc(ptr long ptr ptr)
 @ stub WsAsyncExecute
 @ stub WsCall
 @ stub WsCheckMustUnderstandHeaders
@@ -93,7 +93,7 @@
 @ stub WsInitializeMessage
 @ stub WsMarkHeaderAsUnderstood
 @ stub WsMatchPolicyAlternative
-@ stub WsMoveReader
+@ stdcall WsMoveReader(ptr long ptr ptr)
 @ stub WsMoveWriter
 @ stub WsOpenChannel
 @ stub WsOpenListener
@@ -183,11 +183,11 @@
 @ stub WsWriteQualifiedName
 @ stub WsWriteStartAttribute
 @ stub WsWriteStartCData
-@ stub WsWriteStartElement
+@ stdcall WsWriteStartElement(ptr ptr ptr ptr ptr)
 @ stub WsWriteText
 @ stub WsWriteType
 @ stub WsWriteValue
 @ stub WsWriteXmlBuffer
 @ stub WsWriteXmlBufferToBytes
 @ stub WsWriteXmlnsAttribute
-@ stub WsXmlStringEquals
+@ stdcall WsXmlStringEquals(ptr ptr ptr)

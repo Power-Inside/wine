@@ -207,6 +207,8 @@ struct d3d_shader_resource_view
 
 HRESULT d3d_shader_resource_view_create(struct d3d_device *device, ID3D11Resource *resource,
         const D3D11_SHADER_RESOURCE_VIEW_DESC *desc, struct d3d_shader_resource_view **view) DECLSPEC_HIDDEN;
+struct d3d_shader_resource_view *unsafe_impl_from_ID3D11ShaderResourceView(
+        ID3D11ShaderResourceView *iface) DECLSPEC_HIDDEN;
 struct d3d_shader_resource_view *unsafe_impl_from_ID3D10ShaderResourceView(
         ID3D10ShaderResourceView *iface) DECLSPEC_HIDDEN;
 
@@ -352,6 +354,7 @@ struct d3d_sampler_state
 
 HRESULT d3d_sampler_state_init(struct d3d_sampler_state *state, struct d3d_device *device,
         const D3D11_SAMPLER_DESC *desc) DECLSPEC_HIDDEN;
+struct d3d_sampler_state *unsafe_impl_from_ID3D11SamplerState(ID3D11SamplerState *iface) DECLSPEC_HIDDEN;
 struct d3d_sampler_state *unsafe_impl_from_ID3D10SamplerState(ID3D10SamplerState *iface) DECLSPEC_HIDDEN;
 
 /* ID3D11Query, ID3D10Query */
@@ -369,6 +372,7 @@ struct d3d_query
 
 HRESULT d3d_query_create(struct d3d_device *device, const D3D11_QUERY_DESC *desc, BOOL predicate,
         struct d3d_query **query) DECLSPEC_HIDDEN;
+struct d3d_query *unsafe_impl_from_ID3D11Query(ID3D11Query *iface) DECLSPEC_HIDDEN;
 struct d3d_query *unsafe_impl_from_ID3D10Query(ID3D10Query *iface) DECLSPEC_HIDDEN;
 
 /* ID3D11DeviceContext - immediate context */

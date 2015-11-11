@@ -38,6 +38,9 @@ typedef struct fw_port
 {
     INetFwOpenPort INetFwOpenPort_iface;
     LONG refs;
+    BSTR name;
+    NET_FW_IP_PROTOCOL protocol;
+    LONG port;
 } fw_port;
 
 static inline fw_port *impl_from_INetFwOpenPort( INetFwOpenPort *iface )
@@ -60,6 +63,7 @@ static ULONG WINAPI fw_port_Release(
     if (!refs)
     {
         TRACE("destroying %p\n", fw_port);
+        SysFreeString( fw_port->name );
         HeapFree( GetProcessHeap(), 0, fw_port );
     }
     return refs;
@@ -179,8 +183,14 @@ static HRESULT WINAPI fw_port_put_Name(
 {
     fw_port *This = impl_from_INetFwOpenPort( iface );
 
-    FIXME("%p %s\n", This, debugstr_w(name));
-    return E_NOTIMPL;
+    TRACE("%p %s\n", This, debugstr_w(name));
+
+    if (!(name = SysAllocString( name )))
+        return E_OUTOFMEMORY;
+
+    SysFreeString( This->name );
+    This->name = name;
+    return S_OK;
 }
 
 static HRESULT WINAPI fw_port_get_IpVersion(
@@ -219,8 +229,13 @@ static HRESULT WINAPI fw_port_put_Protocol(
 {
     fw_port *This = impl_from_INetFwOpenPort( iface );
 
-    FIXME("%p %u\n", This, ipProtocol);
-    return E_NOTIMPL;
+    TRACE("%p %u\n", This, ipProtocol);
+
+    if (ipProtocol != NET_FW_IP_PROTOCOL_TCP && ipProtocol != NET_FW_IP_PROTOCOL_UDP)
+        return E_INVALIDARG;
+
+    This->protocol = ipProtocol;
+    return S_OK;
 }
 
 static HRESULT WINAPI fw_port_get_Port(
@@ -239,8 +254,9 @@ static HRESULT WINAPI fw_port_put_Port(
 {
     fw_port *This = impl_from_INetFwOpenPort( iface );
 
-    FIXME("%p %d\n", This, portNumber);
-    return E_NOTIMPL;
+    TRACE("%p %d\n", This, portNumber);
+    This->port = portNumber;
+    return S_OK;
 }
 
 static HRESULT WINAPI fw_port_get_Scope(
@@ -352,6 +368,9 @@ HRESULT NetFwOpenPort_create( IUnknown *pUnkOuter, LPVOID *ppObj )
 
     fp->INetFwOpenPort_iface.lpVtbl = &fw_port_vtbl;
     fp->refs = 1;
+    fp->name = NULL;
+    fp->protocol = NET_FW_IP_PROTOCOL_TCP;
+    fp->port = 0;
 
     *ppObj = &fp->INetFwOpenPort_iface;
 

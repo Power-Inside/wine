@@ -84,6 +84,21 @@ NTSTATUS WINAPI NtCreateKey( PHANDLE retkey, ACCESS_MASK access, const OBJECT_AT
     return ret;
 }
 
+NTSTATUS WINAPI NtCreateKeyTransacted( PHANDLE retkey, ACCESS_MASK access, const OBJECT_ATTRIBUTES *attr,
+                                       ULONG TitleIndex, const UNICODE_STRING *class, ULONG options,
+                                       HANDLE transacted, ULONG *dispos )
+{
+    FIXME( "(%p,%s,%s,%x,%x,%p,%p)\n", attr->RootDirectory, debugstr_us(attr->ObjectName),
+           debugstr_us(class), options, access, transacted, retkey );
+    return STATUS_NOT_IMPLEMENTED;
+}
+
+NTSTATUS WINAPI NtRenameKey( HANDLE handle, UNICODE_STRING *name )
+{
+    FIXME( "(%p %s)\n", handle, debugstr_us(name) );
+    return STATUS_NOT_IMPLEMENTED;
+}
+
 /******************************************************************************
  *  RtlpNtCreateKey [NTDLL.@]
  *
@@ -149,6 +164,19 @@ NTSTATUS WINAPI NtOpenKeyEx( PHANDLE retkey, ACCESS_MASK access, const OBJECT_AT
 NTSTATUS WINAPI NtOpenKey( PHANDLE retkey, ACCESS_MASK access, const OBJECT_ATTRIBUTES *attr )
 {
     return NtOpenKeyEx( retkey, access, attr, 0 );
+}
+
+NTSTATUS WINAPI NtOpenKeyTransactedEx( PHANDLE retkey, ACCESS_MASK access, const OBJECT_ATTRIBUTES *attr,
+                                       ULONG options, HANDLE transaction )
+{
+    FIXME( "(%p %x %p %x %p)\n", retkey, access, attr, options, transaction );
+    return STATUS_NOT_IMPLEMENTED;
+}
+
+NTSTATUS WINAPI NtOpenKeyTransacted( PHANDLE retkey, ACCESS_MASK access, const OBJECT_ATTRIBUTES *attr,
+                                     HANDLE transaction )
+{
+    return NtOpenKeyTransactedEx( retkey, access, attr, 0, transaction );
 }
 
 /******************************************************************************
@@ -633,28 +661,30 @@ NTSTATUS WINAPI NtLoadKey( const OBJECT_ATTRIBUTES *attr, OBJECT_ATTRIBUTES *fil
 }
 
 /******************************************************************************
- *  NtNotifyChangeKey	[NTDLL.@]
- *  ZwNotifyChangeKey   [NTDLL.@]
+ *  NtNotifyChangeMultipleKeys  [NTDLL.@]
+ *  ZwNotifyChangeMultipleKeys  [NTDLL.@]
  */
-NTSTATUS WINAPI NtNotifyChangeKey(
-	IN HANDLE KeyHandle,
-	IN HANDLE Event,
-	IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
-	IN PVOID ApcContext OPTIONAL,
-	OUT PIO_STATUS_BLOCK IoStatusBlock,
-	IN ULONG CompletionFilter,
-	IN BOOLEAN WatchSubtree,
-	OUT PVOID ChangeBuffer,
-	IN ULONG Length,
-	IN BOOLEAN Asynchronous)
+NTSTATUS WINAPI NtNotifyChangeMultipleKeys(
+        HANDLE KeyHandle,
+        ULONG Count,
+        OBJECT_ATTRIBUTES *SubordinateObjects,
+        HANDLE Event,
+        PIO_APC_ROUTINE ApcRoutine,
+        PVOID ApcContext,
+        PIO_STATUS_BLOCK IoStatusBlock,
+        ULONG CompletionFilter,
+        BOOLEAN WatchSubtree,
+        PVOID ChangeBuffer,
+        ULONG Length,
+        BOOLEAN Asynchronous)
 {
     NTSTATUS ret;
 
-    TRACE("(%p,%p,%p,%p,%p,0x%08x, 0x%08x,%p,0x%08x,0x%08x)\n",
-        KeyHandle, Event, ApcRoutine, ApcContext, IoStatusBlock, CompletionFilter,
+    TRACE("(%p,%u,%p,%p,%p,%p,%p,0x%08x, 0x%08x,%p,0x%08x,0x%08x)\n",
+        KeyHandle, Count, SubordinateObjects, Event, ApcRoutine, ApcContext, IoStatusBlock, CompletionFilter,
         Asynchronous, ChangeBuffer, Length, WatchSubtree);
 
-    if (ApcRoutine || ApcContext || ChangeBuffer || Length)
+    if (Count || SubordinateObjects || ApcRoutine || ApcContext || ChangeBuffer || Length)
         FIXME("Unimplemented optional parameter\n");
 
     if (!Asynchronous)
@@ -678,12 +708,33 @@ NTSTATUS WINAPI NtNotifyChangeKey(
  
     if (!Asynchronous)
     {
-        if (ret == STATUS_SUCCESS)
-            NtWaitForSingleObject( Event, FALSE, NULL );
+        if (ret == STATUS_PENDING)
+            ret = NtWaitForSingleObject( Event, FALSE, NULL );
         NtClose( Event );
     }
 
-    return STATUS_SUCCESS;
+    return ret;
+}
+
+/******************************************************************************
+ *  NtNotifyChangeKey	[NTDLL.@]
+ *  ZwNotifyChangeKey   [NTDLL.@]
+ */
+NTSTATUS WINAPI NtNotifyChangeKey(
+	IN HANDLE KeyHandle,
+	IN HANDLE Event,
+	IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
+	IN PVOID ApcContext OPTIONAL,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	IN ULONG CompletionFilter,
+	IN BOOLEAN WatchSubtree,
+	OUT PVOID ChangeBuffer,
+	IN ULONG Length,
+	IN BOOLEAN Asynchronous)
+{
+    return NtNotifyChangeMultipleKeys(KeyHandle, 0, NULL, Event, ApcRoutine, ApcContext,
+                                      IoStatusBlock, CompletionFilter, WatchSubtree,
+                                      ChangeBuffer, Length, Asynchronous);
 }
 
 /******************************************************************************
